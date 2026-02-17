@@ -222,4 +222,4 @@ Emirkhan Khajifazlyoglu
 
 ---
 
-**Stack**: Django 6.0 | Aiogram 3.x | Celery 5.6 | PostgreSQL | Redis | Docker
+**Stack**: Django 5.2 | Aiogram 3.25 | Celery 5.6 | PostgreSQL | Redis | Docker
