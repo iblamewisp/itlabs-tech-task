@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from .models import Task, Category
 
 
@@ -8,9 +9,13 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name', 'user__username', 'user__telegram_id')
     list_select_related = ('user',)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_task_count=Count('tasks'))
+
     def task_count(self, obj):
-        return obj.tasks.count()
+        return obj._task_count
     task_count.short_description = 'Tasks'
+    task_count.admin_order_field = '_task_count'
 
 
 @admin.register(Task)

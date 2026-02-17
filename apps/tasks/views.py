@@ -32,7 +32,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         user = get_object_or_404(User, telegram_id=telegram_id)
 
-        queryset = Task.objects.filter(user=user).select_related('category', 'user')
+        queryset = Task.objects.filter(user=user).select_related('category')
 
         # Filter by completion status if provided
         is_completed = self.request.query_params.get('is_completed')

@@ -74,8 +74,8 @@ class ReminderService:
             task.reminder_level = 'daily'
             task.last_reminder_sent = None
         
-        task.save()
-        
+        task.save(update_fields=['deadline', 'next_reminder_time', 'reminder_level', 'last_reminder_sent'])
+
         logger.info(f"Reminder updated for task {task.id} with new deadline {new_deadline}")
     
     @staticmethod

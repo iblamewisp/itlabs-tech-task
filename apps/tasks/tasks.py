@@ -18,18 +18,18 @@ def check_smart_reminders():
     
     Responsibility: ONLY scheduling (coordination)
     """
-    # Delegate query to TaskService
-    tasks_to_remind = TaskService.get_tasks_needing_reminders()
-    
-    logger.info(f"Found {tasks_to_remind.count()} tasks needing reminders")
-    
+    # Delegate query to TaskService — evaluate once to avoid double DB hit
+    tasks_to_remind = list(TaskService.get_tasks_needing_reminders())
+
+    logger.info(f"Found {len(tasks_to_remind)} tasks needing reminders")
+
     # Schedule individual reminder tasks
     for task in tasks_to_remind:
         send_smart_reminder.delay(str(task.id))
-    
+
     return {
         'checked_at': timezone.now().isoformat(),
-        'tasks_found': tasks_to_remind.count()
+        'tasks_found': len(tasks_to_remind)
     }
 
 

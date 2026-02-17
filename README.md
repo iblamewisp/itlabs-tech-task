@@ -8,11 +8,11 @@ A production-ready todo list bot with smart reminders. Built with Django, Aiogra
 - **Smart Reminders**: 6-level escalation system (daily → urgent → final)
 - **Natural Language**: "tomorrow at 3pm", "in 2 hours", etc.
 - **Telegram Bot**: Full FSM-based dialog flow
-- **America/Adak Timezone**: Because why the fuck not
+- **America/Adak Timezone**: Tech task requirement
 
 ## Architecture
 
-SOLID principles throughout. No Django fat models bullshit.
+SOLID principles throughout, or at least following some principles (for the sake of clear and rapid development).
 
 ```
 apps/tasks/
@@ -162,7 +162,7 @@ Tasks get reminders based on time-to-deadline:
 
 ## Database
 
-Uses ULID for primary keys instead of UUID. Why?
+Uses ULID for primary keys instead of UUID. Tech-task requirement
 - Sortable by creation time
 - Shorter string representation
 - Better database performance
@@ -192,21 +192,21 @@ None. System is solid.
 - Can scale workers horizontally
 
 **Why SOLID over Django monoliths?**
-- Testable code (when we write tests lol)
+- Testable code (when we write tests, but i decided not to.)
 - Easy to understand
 - Services < 150 lines each
 
 ## Contributing
 
-Don't. This is a personal project.
+Technical task
 
 ## License
 
-MIT or whatever. Do what you want.
+MIT or whatever ? technical task.
 
 ## Credits
 
-Built by someone who's tired of bloated Django projects.
+Emirkhan Khajifazlyoglu
 
 ---
 
