@@ -126,10 +126,13 @@ CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localho
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TASK_RESULT_EXPIRES = 3600  # Purge task results from Redis after 1 hour
+
 CELERY_BEAT_SCHEDULE = {
     'check-smart-reminders-every-minute': {
         'task': 'apps.tasks.tasks.check_smart_reminders',
         'schedule': 60.0,  # Every 60 seconds
+        'options': {'expires': 55},  # Drop if still queued when next cycle fires
     },
 }
 

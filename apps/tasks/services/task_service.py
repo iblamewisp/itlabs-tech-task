@@ -86,7 +86,14 @@ class TaskService:
                 task.deadline = deadline
 
         if not deadline_changed:
-            task.save()
+            update_fields = ['updated_at']
+            if title is not None:
+                update_fields.append('title')
+            if description is not None:
+                update_fields.append('description')
+            if category is not None:
+                update_fields.append('category')
+            task.save(update_fields=update_fields)
 
         # Update reminders if deadline changed
         if deadline_changed:
