@@ -42,6 +42,7 @@ def setup_dispatcher(storage: RedisStorage) -> Dispatcher:
     dp.message.middleware(service_middleware)
     dp.callback_query.middleware(service_middleware)
     dp.message.middleware(rate_limit_middleware)
+    dp.callback_query.middleware(rate_limit_middleware)
     
     # Handlers
     dp.include_router(start.router)

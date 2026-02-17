@@ -1,7 +1,7 @@
 # bot/middlewares/rate_limit.py
 from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
-from aiogram.types import Message
+from aiogram.types import TelegramObject, Message, CallbackQuery
 import time
 import logging
 
@@ -10,49 +10,49 @@ logger = logging.getLogger(__name__)
 
 class RateLimitMiddleware(BaseMiddleware):
     """
-    Rate limiting middleware.
-    Prevents spam by limiting messages per user.
+    Rate limiting middleware for both messages and callback queries.
+    Prevents spam by limiting events per user.
     """
-    
+
     def __init__(self, rate_limit: int = 3, period: int = 1):
         """
         Args:
-            rate_limit: Max messages per period
+            rate_limit: Max events per period
             period: Time period in seconds
         """
         self.rate_limit = rate_limit
         self.period = period
-        self.user_messages: Dict[int, list] = {}
-    
+        self.user_events: Dict[int, list] = {}
+
     async def __call__(
         self,
-        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-        event: Message,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
         data: Dict[str, Any]
     ) -> Any:
-        user_id = event.from_user.id
+        from_user = getattr(event, 'from_user', None)
+        if not from_user:
+            return await handler(event, data)
+
+        user_id = from_user.id
         current_time = time.time()
-        
-        # Initialize user history
-        if user_id not in self.user_messages:
-            self.user_messages[user_id] = []
-        
-        # Clean old messages
-        self.user_messages[user_id] = [
-            msg_time for msg_time in self.user_messages[user_id]
-            if current_time - msg_time < self.period
+
+        if user_id not in self.user_events:
+            self.user_events[user_id] = []
+
+        # Drop timestamps outside the window
+        self.user_events[user_id] = [
+            t for t in self.user_events[user_id]
+            if current_time - t < self.period
         ]
-        
-        # Check rate limit
-        if len(self.user_messages[user_id]) >= self.rate_limit:
+
+        if len(self.user_events[user_id]) >= self.rate_limit:
             logger.warning(f"Rate limit exceeded for user {user_id}")
-            await event.answer(
-                "⚠️ You're sending messages too fast. Please slow down."
-            )
+            if isinstance(event, Message):
+                await event.answer("⚠️ You're sending messages too fast. Please slow down.")
+            elif isinstance(event, CallbackQuery):
+                await event.answer("⚠️ Too fast! Slow down.", show_alert=False)
             return
-        
-        # Add current message
-        self.user_messages[user_id].append(current_time)
-        
-        # Continue processing
+
+        self.user_events[user_id].append(current_time)
         return await handler(event, data)

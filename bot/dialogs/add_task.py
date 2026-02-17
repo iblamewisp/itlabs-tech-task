@@ -64,7 +64,7 @@ async def process_deadline_button(
     if action == "skip":
         # No deadline - proceed to category selection
         await state.update_data(deadline=None)
-        await show_category_selection(callback.message, state, task_service, edit=True)
+        await show_category_selection(callback.message, state, task_service, telegram_id=callback.from_user.id, edit=True)
         await callback.answer()
         return
 
