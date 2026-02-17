@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 
 class DjangoBackend(IBackendAPI):
     """Django REST API backend implementation"""
-    
-    def __init__(self, base_url: str):
+
+    def __init__(self, base_url: str, api_key: str = ""):
         self.base_url = base_url.rstrip('/')
-    
+        self._headers = {'X-Internal-Key': api_key} if api_key else {}
+
     async def _request(
         self,
         method: str,
@@ -23,7 +24,7 @@ class DjangoBackend(IBackendAPI):
     ) -> Optional[dict]:
         """Make request to Django API"""
         url = f"{self.base_url}/{endpoint}"
-        return await HTTPClient.request(method, url, params=params, json=json)
+        return await HTTPClient.request(method, url, params=params, json=json, headers=self._headers or None)
     
     # User operations
     

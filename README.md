@@ -1,6 +1,6 @@
 # TodoBot - Telegram Task Manager
 
-A production-ready todo list bot with smart reminders. Built with Django, Aiogram, and Celery.
+A production-ready todo list bot with smart reminders. Built with Django, Aiogram, and Celery. Main AI agent to use was Claude, good context window, not much hallucinations, great choice for fast prototyping.
 
 ## Features
 
@@ -177,7 +177,15 @@ Everything runs in **America/Adak (UTC-10)**. Django's `USE_TZ=True` ensures:
 
 ## Known Issues
 
-None. System is solid.
+Big latency, around 200-300 ms. For a high load system it is not a great statistics. In the dev i'm using polling, but i HIGHLY, HUGELY recommend using webhook (you can choose it in .env), it's a lot more reliable. Task reminder working fine but sometimes it may be late, because of the architecture itself, deadline may fall into the "waiting for celery to see me" state, it's not bad but certainly there was a lot of fixes like schedule based on pings, notif from database and they have their own flaws. Django DRF is sync, fully sync, the PostgreSQL is sync too. Interface - async calls, but its not enough for full "asynchronous I/O". DRF and PostgreSQL blocking the loop and remaining sync, i selected this path because it provided simple troubleshooting and development of prototype, also in technical task there wasn't anything about "async", myself i would choose FastAPI or any other fully async python framework. Database is full of indexes for quick-access and search of needed data, addressed N+1 problems (related with getting categories, tasks), basically i was following django best practices. Gracefull shutdown, everything works fine. For full production of course we need servers, clusters, scaling backend, and especially - change the framework for async i/o, add async database (PostgreSQL+asyncpg), it will be a lot more reasonable, BUT ! it's your decision to assign django so i won't argue with it. Issues i faced: security, added internal api key to resolve problem of everyone hitting backend, and also added rate-limiting on api.
+
+## Production Checklist (medium priority, not implemented)
+
+- **HSTS** — `SECURE_HSTS_SECONDS` is not set in `production.py`. Without it browsers don't enforce HTTPS-only after the first redirect. Add `SECURE_HSTS_SECONDS = 31536000` before going live.
+- **Structured logging** — logs are plaintext stdout. For aggregators (Datadog, Loki, CloudWatch) swap to JSON via `python-json-logger`.
+- **Gunicorn workers** — currently hardcoded to 2 workers in `docker-compose.yml`. For real traffic scale to `2*CPU+1` and add `--timeout 30`.
+- **Observability** - No Sentry, OpenTelemetry, reminders silently fail.
+- **NO TESTS!** - it is important to have tests, unit testing, integration testing, but in tech-task it wasn't included so i skipped it.
 
 ## Technical Decisions
 

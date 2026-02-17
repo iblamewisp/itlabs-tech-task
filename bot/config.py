@@ -38,6 +38,11 @@ class BotConfig(BaseSettings):
         default="http://web:8000/api",
         description="Django REST API base URL"
     )
+
+    internal_api_key: str = Field(
+        default="",
+        description="Shared secret for bot ↔ Django API auth (X-Internal-Key header)"
+    )
     
     # Redis settings
     redis_fsm_url: str = Field(

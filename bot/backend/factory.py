@@ -11,6 +11,6 @@ def create_backend() -> IBackendAPI:
     backend_type = config.backend_type  # 'django' | 'mock' | 'fastapi'
     
     if backend_type == 'django':
-        return DjangoBackend(base_url=config.django_api_url)
+        return DjangoBackend(base_url=config.django_api_url, api_key=config.internal_api_key)
     else:
         raise ValueError(f"Unknown backend type: {backend_type}")

@@ -124,7 +124,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_TIMEZONE = TIME_ZONE
-CELERY_ENABLE_UTC = False
+CELERY_ENABLE_UTC = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'check-smart-reminders-every-minute': {
@@ -133,6 +133,9 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+# Internal API key for bot ↔ Django communication
+INTERNAL_API_KEY = config('INTERNAL_API_KEY', default='')
+
 # DRF
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -140,6 +143,15 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'apps.core.permissions.InternalAPIKeyPermission',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '300/min',
+    },
 }
 
 # Bot
