@@ -1,0 +1,202 @@
+version: '3.8'
+
+services:
+  # ═══════════════════════════════════════════════════════
+  # PostgreSQL Database
+  # ═══════════════════════════════════════════════════════
+  db:
+    image: postgres:18-alpine
+    container_name: todobot_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-todobot}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - todobot_network
+
+  # ═══════════════════════════════════════════════════════
+  # Redis
+  # ═══════════════════════════════════════════════════════
+  redis:
+    image: redis:8-alpine
+    container_name: todobot_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - todobot_network
+
+  # ═══════════════════════════════════════════════════════
+  # Django Web Application
+  # ═══════════════════════════════════════════════════════
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todobot_web
+    command: >
+      bash -c "
+      echo 'Waiting for database...' &&
+      while ! nc -z db 5432; do sleep 1; done &&
+      echo 'Database ready!' &&
+      echo 'Running migrations...' &&
+      python manage.py migrate --noinput &&
+      echo 'Collecting static files...' &&
+      python manage.py collectstatic --noinput --clear &&
+      echo 'Starting Gunicorn...' &&
+      gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2
+      "
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - todobot_network
+
+  # ═══════════════════════════════════════════════════════
+  # Celery Worker
+  # ═══════════════════════════════════════════════════════
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todobot_celery_worker
+    command: >
+      bash -c "
+      echo 'Waiting for web to finish migrations...' &&
+      sleep 20 &&
+      echo 'Starting Celery Worker...' &&
+      celery -A config worker -l info --concurrency=2
+      "
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - todobot_network
+
+  # ═══════════════════════════════════════════════════════
+  # Celery Beat (Scheduler)
+  # ═══════════════════════════════════════════════════════
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todobot_celery_beat
+    command: >
+      bash -c "
+      echo 'Waiting for web to finish migrations...' &&
+      sleep 25 &&
+      echo 'Starting Celery Beat...' &&
+      celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+      "
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - todobot_network
+
+  # ═══════════════════════════════════════════════════════
+  # Telegram Bot
+  # ═══════════════════════════════════════════════════════
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todobot_bot
+    command: >
+      bash -c "
+      echo 'Waiting for web to be ready...' &&
+      sleep 7 &&
+      echo 'Starting Telegram Bot...' &&
+      python -m bot.main
+      "
+    volumes:
+      - .:/app
+    ports:
+      - "8443:8443"
+    env_file:
+      - .env
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN:?BOT_TOKEN not set}
+      DJANGO_API_URL: http://web:8000/api
+      REDIS_FSM_URL: redis://redis:6379/1
+      REDIS_RATE_LIMIT_URL: redis://redis:6379/2
+      USE_WEBHOOK: ${USE_WEBHOOK:-false}
+      WEBHOOK_URL: ${WEBHOOK_URL:-https://yourdomain.com}
+      BACKEND_TYPE: ${BACKEND_TYPE:-django}
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - todobot_network
+
+# ═══════════════════════════════════════════════════════
+# Volumes
+# ═══════════════════════════════════════════════════════
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ═══════════════════════════════════════════════════════
+# Networks
+# ═══════════════════════════════════════════════════════
+networks:
+  todobot_network:
+    driver: bridge

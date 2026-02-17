@@ -1,0 +1,91 @@
+# requirements.txt
+# Last updated: 2026-02-16
+# Python: 3.12+
+
+# ═══════════════════════════════════════════════════════
+# Django Core Framework
+# ═══════════════════════════════════════════════════════
+Django==5.2.11                 # LTS
+djangorestframework==3.16.1      # Latest stable
+django-filter==25.2              # Latest stable
+django-cors-headers==4.7.0       # Latest stable
+psycopg2-binary==2.9.11          # Latest stable
+gunicorn==25.1.0                 # Latest stable
+sqlparse==0.5.5                  # Already latest
+
+# ═══════════════════════════════════════════════════════
+# Celery (Async Task Queue)
+# ═══════════════════════════════════════════════════════
+celery==5.6.2                    # Latest stable (Jan 4, 2026)
+redis==7.1.1                     # Already latest
+django-celery-beat==2.8.1        # Already latest
+kombu==5.6.2                     # Already latest
+amqp==5.3.1                      # Already latest
+billiard==4.2.4                  # Already latest
+vine==5.1.0                      # Already latest
+
+# ═══════════════════════════════════════════════════════
+# Utilities
+# ═══════════════════════════════════════════════════════
+python-decouple==3.8             # Already latest
+python-ulid==3.1.0               # Already latest
+python-dateutil==2.9.0.post0     # Already latest
+tzdata==2025.3                   # Already latest
+tzlocal==5.3.1                   # Already latest
+
+# ═══════════════════════════════════════════════════════
+# Telegram Bot (Aiogram)
+# ═══════════════════════════════════════════════════════
+aiogram==3.25.0                  # Latest stable (Feb 10, 2026) - Bot API 9.4
+aiohttp==3.13.3                  # Already latest
+aiofiles==25.1.0                 # Already latest
+aiogram-dialog==2.4.0            # Already latest (if using dialogs)
+magic-filter==1.0.12             # Already latest
+
+# ═══════════════════════════════════════════════════════
+# Async & HTTP
+# ═══════════════════════════════════════════════════════
+aiosignal==1.4.0                 # Already latest
+aiohappyeyeballs==2.6.1          # Already latest
+frozenlist==1.8.0                # Already latest
+multidict==6.7.1                 # Already latest
+yarl==1.22.0                     # Already latest
+propcache==0.4.1                 # Already latest
+attrs==25.4.0                    # Already latest
+certifi==2026.1.4                # Already latest
+idna==3.11                       # Already latest
+
+# ═══════════════════════════════════════════════════════
+# Data Validation
+# ═══════════════════════════════════════════════════════
+pydantic==2.12.5                 # Already latest
+pydantic-settings==2.12.0
+pydantic-core==2.41.5            # Already latest
+annotated-types==0.7.0           # Already latest
+typing-extensions==4.15.0        # Already latest
+typing-inspection==0.4.2         # Already latest
+
+# ═══════════════════════════════════════════════════════
+# HTTP Client (for Celery notifications)
+# ═══════════════════════════════════════════════════════
+requests==2.32.3                 # Latest stable
+
+# ═══════════════════════════════════════════════════════
+# CLI & Templates
+# ═══════════════════════════════════════════════════════
+click==8.3.1                     # Already latest
+click-didyoumean==0.3.1          # Already latest
+click-plugins==1.1.1.2           # Already latest
+click-repl==0.3.0                # Already latest
+prompt-toolkit==3.0.52           # Already latest
+wcwidth==0.6.0                   # Already latest
+Jinja2==3.1.6                    # Already latest
+MarkupSafe==3.0.3                # Already latest
+
+# ═══════════════════════════════════════════════════════
+# Utilities & Misc
+# ═══════════════════════════════════════════════════════
+asgiref==3.11.1                  # Already latest
+cachetools==5.5.2                # Already latest
+packaging==26.0                  # Already latest
+six==1.17.0                      # Already latest

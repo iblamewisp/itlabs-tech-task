@@ -1,0 +1,38 @@
+# .gitignore
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+celerybeat-schedule
+celerybeat.pid
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+db.sqlite3
+/media
+/staticfiles
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
