@@ -15,6 +15,7 @@ class Category(TimeStampedModel):
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
         unique_together = [['user', 'name']]
+        ordering = ['name']
     
     def __str__(self):
         return self.name
@@ -72,6 +73,7 @@ class Task(TimeStampedModel):
         db_table = 'tasks'
         verbose_name = 'Task'
         verbose_name_plural = 'Tasks'
+        ordering = ['-created_at']
         indexes = [
             models.Index(fields=['user', 'is_completed']),
             models.Index(fields=['next_reminder_time']),  # for efficient celery requests, i placed idx on next_time

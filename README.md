@@ -54,13 +54,17 @@ cd todobot
 cp .env.example .env
 ```
 
-2. **Edit `.env` file** - add your bot token:
+2. **Edit `.env`** — fill in the required values:
 ```bash
-# Required changes:
-BOT_TOKEN=your-actual-telegram-bot-token
-SECRET_KEY=some-random-secret-key  # generate one
+# Required
+BOT_TOKEN=your-telegram-bot-token        # from @BotFather
+SECRET_KEY=some-random-secret-key        # python -c "import secrets; print(secrets.token_hex(32))"
+INTERNAL_API_KEY=some-random-secret-key  # same command, different value — secures bot↔backend traffic
 
-# Everything else can stay default for local dev
+# Optional (leave defaults for local dev)
+# DEBUG=True
+# USE_WEBHOOK=false
+# POSTGRES_PASSWORD=postgres
 ```
 
 3. **Start everything**:

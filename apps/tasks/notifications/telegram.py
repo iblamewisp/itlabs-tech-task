@@ -1,5 +1,6 @@
 # apps/tasks/notifications/telegram.py
 from aiogram import Bot
+from aiogram.exceptions import TelegramForbiddenError
 from django.conf import settings
 import asyncio
 import logging
@@ -53,6 +54,9 @@ class TelegramNotification(NotificationChannel):
             logger.info(f"Notification sent to {recipient_id}")
             return True
             
+        except TelegramForbiddenError:
+            # User blocked the bot — caller must handle this, not retry
+            raise
         except Exception as e:
             logger.error(f"Failed to send to {recipient_id}: {e}")
             return False

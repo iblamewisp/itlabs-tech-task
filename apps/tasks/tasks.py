@@ -1,11 +1,13 @@
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
+from aiogram.exceptions import TelegramForbiddenError
 from django.utils import timezone
 from apps.tasks.services.task_service import TaskService
 from apps.tasks.services.notification_service import NotificationService
 from apps.tasks.services.reminder_service import ReminderService
 from apps.tasks.notifications.telegram import TelegramNotification
 from apps.tasks.models import Task
+from apps.users.services import UserService
 import logging
 
 logger = logging.getLogger(__name__)
@@ -56,6 +58,9 @@ def send_smart_reminder(self, task_id: str):
     try:
         notification_service = NotificationService(TelegramNotification())
         success = notification_service.send_reminder(task)
+    except TelegramForbiddenError:
+        UserService.handle_bot_blocked(task.user)
+        return {'success': False, 'error': 'bot_blocked', 'user_deleted': True}
     except SoftTimeLimitExceeded:
         logger.warning(f"Notification timed out for task {task_id}, retrying")
         raise self.retry(countdown=60 * (2 ** self.request.retries))
