@@ -64,7 +64,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     
     def perform_update(self, serializer):
         """Handle task updates - delegate to TaskService"""
-        instance = self.get_object()
+        instance = serializer.instance
         validated_data = serializer.validated_data
 
         # Check if completion status changed

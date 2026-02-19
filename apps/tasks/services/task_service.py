@@ -81,9 +81,7 @@ class TaskService:
             old_deadline = task.deadline
             if old_deadline != deadline:
                 deadline_changed = True
-                # Don't save here - ReminderService will handle it
-            else:
-                task.deadline = deadline
+                task.deadline = deadline  # ReminderService will save it
 
         if not deadline_changed:
             update_fields = ['updated_at']

@@ -89,14 +89,15 @@ class ReminderService:
         """
         from django.utils import timezone
         
-        # Update last reminder time
-        task.last_reminder_sent = timezone.now()
-        
-        # Calculate next reminder
+        # Calculate next reminder before updating last_reminder_sent
+        previous_reminder_sent = task.last_reminder_sent
         next_reminder, new_level = ReminderCalculator.calculate_next_reminder(
             deadline=task.deadline,
-            last_reminder=task.last_reminder_sent
+            last_reminder=previous_reminder_sent
         )
+
+        # Update last reminder time
+        task.last_reminder_sent = timezone.now()
         
         task.next_reminder_time = next_reminder
         task.reminder_level = new_level
